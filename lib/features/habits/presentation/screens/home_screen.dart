@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_theme.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../providers/habits_provider.dart';
 import '../widgets/habit_card.dart';
 
@@ -11,6 +12,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final habits = ref.watch(habitsProvider);
     final today = DateTime.now();
     final completedCount =
@@ -19,12 +21,19 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes habitudes'),
+        title: Semantics(
+          label: l10n.home,
+          child: Text(l10n.home),
+        ),
         actions: [
-          IconButton(
-            tooltip: 'Ajouter une habitude',
-            onPressed: () => context.push('/habit/new'),
-            icon: const Icon(Icons.add_rounded),
+          Semantics(
+            label: l10n.addHabit,
+            button: true,
+            child: IconButton(
+              tooltip: l10n.addHabit,
+              onPressed: () => context.push('/habit/new'),
+              icon: const Icon(Icons.add_rounded),
+            ),
           ),
         ],
       ),
@@ -33,61 +42,73 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
           children: [
-            Text(
-              'Bonjour 👋',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+            Semantics(
+              label: 'Message de bienvenue',
+              child: Text(
+                'Bonjour 👋',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
             ),
             const SizedBox(height: 4),
-            Text(
-              'Voici votre progression pour aujourd’hui.',
-              style: Theme.of(context).textTheme.bodyMedium,
+            Semantics(
+              label: 'Description de progression',
+              child: Text(
+                'Voici votre progression pour aujourd’hui.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ),
             const SizedBox(height: 20),
-            Card(
-              elevation: 0,
-              color: WhatsAppColors.primaryGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Objectif du jour',
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            habits.isEmpty
-                                ? 'Créez votre première habitude'
-                                : '$completedCount sur ${habits.length} terminée(s)',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
+            Semantics(
+              label: 'Carte de progression',
+              child: Card(
+                elevation: 0,
+                color: WhatsAppColors.primaryGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Objectif du jour',
+                              style: TextStyle(color: Colors.white70),
                             ),
+                            const SizedBox(height: 8),
+                            Text(
+                              habits.isEmpty
+                                  ? 'Créez votre première habitude'
+                                  : '$completedCount sur ${habits.length} terminée(s)',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Semantics(
+                        label: 'Progression ${progress.toStringAsFixed(0)} pour cent',
+                        child: SizedBox(
+                          width: 64,
+                          height: 64,
+                          child: CircularProgressIndicator(
+                            value: progress,
+                            strokeWidth: 7,
+                            backgroundColor: Colors.white24,
+                            color: WhatsAppColors.accentGreen,
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth: 7,
-                        backgroundColor: Colors.white24,
-                        color: WhatsAppColors.accentGreen,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -95,21 +116,27 @@ class HomeScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Aujourd’hui',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                Semantics(
+                  label: l10n.today,
+                  child: Text(
+                    l10n.today,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
                 ),
-                Text(
-                  '${habits.length} habitude(s)',
-                  style: Theme.of(context).textTheme.bodySmall,
+                Semantics(
+                  label: '${habits.length} habitudes',
+                  child: Text(
+                    '${habits.length} habitude(s)',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             if (habits.isEmpty)
-              _EmptyHabits(onAdd: () => context.push('/habit/new'))
+              _EmptyHabits(onAdd: () => context.push('/habit/new'), l10n: l10n)
             else
               ...habits.map(
                 (habit) => HabitCard(
@@ -124,10 +151,14 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/habit/new'),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Ajouter'),
+      floatingActionButton: Semantics(
+        label: l10n.addHabit,
+        button: true,
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/habit/new'),
+          icon: const Icon(Icons.add_rounded),
+          label: Text(l10n.addHabit),
+        ),
       ),
     );
   }
@@ -135,8 +166,9 @@ class HomeScreen extends ConsumerWidget {
 
 class _EmptyHabits extends StatelessWidget {
   final VoidCallback onAdd;
+  final AppLocalizations l10n;
 
-  const _EmptyHabits({required this.onAdd});
+  const _EmptyHabits({required this.onAdd, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -159,10 +191,14 @@ class _EmptyHabits extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Créer une habitude'),
+            Semantics(
+              label: l10n.addHabit,
+              button: true,
+              child: FilledButton.icon(
+                onPressed: onAdd,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.addHabit),
+              ),
             ),
           ],
         ),

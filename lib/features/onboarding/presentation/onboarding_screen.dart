@@ -14,8 +14,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
-  double _pageValue =
-      0.0; // position fractionnaire du PageView (pour le parallax)
+  double _pageValue = 0.0;
 
   final List<OnboardingItem> _items = const [
     OnboardingItem(
@@ -50,6 +49,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_seen', true);
@@ -57,12 +62,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!mounted) return;
 
     if (mounted) context.go('/auth');
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   bool get _isLastPage => _currentIndex == _items.length - 1;
@@ -77,7 +76,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         elevation: 0,
         title: Row(
           children: [
-            // Logo de l'application (remplace l'ancienne icône générique).
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.asset(
@@ -86,7 +84,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 32,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
-                  // Filet de sécurité si l'asset est introuvable.
                   return const Icon(Icons.track_changes_rounded);
                 },
               ),
@@ -101,8 +98,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ],
         ),
         actions: [
-          // Le bouton Passer reste en place (pas de saut de layout) : il
-          // s'efface et devient non interactif sur la dernière page.
           AnimatedOpacity(
             duration: const Duration(milliseconds: 250),
             opacity: _isLastPage ? 0.0 : 1.0,
@@ -132,8 +127,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             colors: [
               Theme.of(context).colorScheme.surface,
               WhatsAppColors.accentGreen.withValues(
-                // La teinte de fond respire légèrement plus fort en fin de
-                // parcours pour accompagner la progression.
                 alpha: (isDark ? 0.08 : 0.04) +
                     (_pageValue / (_items.length - 1)) * 0.03,
               ),
@@ -148,8 +141,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
               return Column(
                 children: [
-                  // Animation Lottie avec un léger effet de respiration liée
-                  // à la position de la page (scale doux, jamais figé).
                   Builder(
                     builder: (context) {
                       final wobble =
@@ -187,9 +178,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       itemBuilder: (context, index) {
                         final item = _items[index];
 
-                        // Parallax : chaque page glisse et s'estompe en
-                        // fonction de sa distance à la page active, pour un
-                        // effet de profondeur pendant le swipe.
                         final distance = (_pageValue - index);
                         final opacity =
                             (1 - distance.abs() * 1.1).clamp(0.0, 1.0);
@@ -269,8 +257,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Indicateurs : largeur ET couleur animées, avec un
-                        // léger rebond sur le dot actif.
                         Row(
                           children: List.generate(
                             _items.length,
@@ -293,8 +279,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
 
-                        // Bouton : icône et libellé transitionnent en douceur
-                        // au lieu de changer brutalement sur la dernière page.
                         FilledButton(
                           onPressed: () {
                             if (!_isLastPage) {

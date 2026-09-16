@@ -254,10 +254,14 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(
-                          'assets/images/google_logo.png',
-                          width: 22,
-                          height: 22,
+                        Semantics(
+                          label: 'Logo Google',
+                          child: Image.asset(
+                            'assets/images/google_logo.png',
+                            width: 22,
+                            height: 22,
+                            gaplessPlayback: true,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         const Text(
